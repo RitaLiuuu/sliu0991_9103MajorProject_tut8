@@ -197,6 +197,10 @@ class CirclePattern {
     }
   }
 
+  updateRandomSmallCircles() {
+    this.smallCircles = this.generateRandomSmallCircles();
+  }
+
   getX() {
     return this.xFactor * windowHeight / 20;
   }
@@ -311,8 +315,40 @@ function play_pause() {
 
 function windowResized() {
   resizeCanvas(windowHeight, windowHeight);
-  circleDiameter = (windowHeight / 20) * 5.5; 
-  draw(); 
-  //Reset the position of the button
+  circleDiameter = (windowHeight / 20) * 5.5;
+
+  bgCircles = [];
+  for (let i = 0; i < bgCircleAmount; i++) {
+    let overlapping = true;
+    let bgCircle;
+    while (overlapping) {
+      overlapping = false;
+      bgCircle = new bgCirclePattern(random(width), random(height), random(0, 10));
+
+      for (let other of bgCircles) {
+        let d = dist(bgCircle.xPos, bgCircle.yPos, other.xPos, other.yPos);
+        if (d < bgCircle.radius + other.radius) {
+          overlapping = true;
+          break;
+        }
+      }
+
+      for (let bigCircle of circles) {
+        let d = dist(bgCircle.xPos, bgCircle.yPos, bigCircle.getX(), bigCircle.getY());
+        if (d < bgCircle.radius + circleDiameter / 2 + 15) {
+          overlapping = true;
+          break;
+        }
+      }
+    }
+    bgCircles.push(bgCircle);
+  }
+
+  for (let circle of circles) {
+    circle.updateRandomSmallCircles();
+  }
+
+  draw();
+
   button.position((width - button.width) / 2, height - button.height - 2);
 }
